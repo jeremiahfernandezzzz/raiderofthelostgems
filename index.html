@@ -751,9 +751,9 @@
 		
 		window.setTimeout(function(){
 			if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
-				document.querySelector(".console").innerHTML = "controls<br />forward: up key<br />turn left/right: left/right key";
-			} else {
 				document.querySelector(".console").innerHTML = "controls<br />forward: automatic on phones <br/> turn left/right: touch left/right side of screen";
+			} else {
+				document.querySelector(".console").innerHTML = "controls<br />forward: up key<br />turn left/right: left/right key";
 			}
 			game();
 		}, 15000)
