@@ -1,0 +1,794 @@
+<!DOCTYPE>
+<html>
+	<head>
+		<meta content='maximum-scale=1.0, user-scalable=0' name='viewport' />-
+		<title>Raider of the Lost Gems</title>
+	</head>
+	<body>
+
+		<div class="hit-bar"><span class="hit-points"></span></div>
+		<div class="game">
+			<div class="randomizer"></div>
+
+			<div class="actor"><div class="rotator">^</div></div>		
+		</div>
+		<div class="console"></div>
+		<div class="console2"></div>
+		<div class="console1"></div>
+		<div class="console3"></div>
+		
+		<div class="mobile left"></div>
+		<div class="mobile right"></div>
+	</body>
+</html>
+<style>
+
+	@keyframes color-change {
+		0% { background-color: 0C2915; }
+		40% { background-color: 0C2629; }
+		90% { background-color: 0C0F29; }
+		100% { background-color: 0C2915; }
+	}
+	@font-face {
+		font-family: "Hexagon";
+		src: url("Hexagon.ttf");
+	}
+	
+	.mobile {
+		position: absolute;
+		width: 40%;
+		height : 100%;
+	}
+	
+	.left {
+		left: 0%;
+	}
+	
+	.right {
+		right: 0%;
+	}
+
+	body {
+		overflow: hidden;
+		text-align: center;
+		background-color: #003B4F;
+		  -webkit-user-select: none;  /* Chrome all / Safari all */
+		  -moz-user-select: none;     /* Firefox all */
+		  -ms-user-select: none;      /* IE 10+ */
+		  user-select: none;          /* Likely future */   
+	}
+	
+	.console {
+		position: fixed;
+		top: 15px;
+		right: 15px;
+		padding: 20px;
+		background: rgba(255, 255, 255, .2);
+		z-index: 99;
+		visibility: visible;
+		font-family: "Consolas";
+		font-size: 15pt;
+		color: grey;
+	}
+	.console2 {
+		position: fixed;
+		top: 15px;
+		left: 15px;
+		padding: 20px;
+		background: rgba(255, 255, 255, .5);
+		z-index: 99;
+		visibility: visible;
+		font-family: "Consolas";
+		font-size: 20pt;
+	}
+	
+	.console1 {
+		position: fixed;
+		bottom: 15px;
+		right: 15px;
+		padding: 20px;
+		background: rgba(255, 255, 255, .2);
+		z-index: 99;
+		visibility: hidden;
+		font-family: "Consolas";
+		font-size: 15pt;
+		color: grey;
+	}
+	
+	.console3 {
+		position: fixed;
+		bottom: 250px;
+		right: 15px;
+		padding: 20px;
+		background: rgba(255, 255, 255, .5);
+		z-index: 99;
+		visibility: hidden;
+		font-family: "Consolas";
+		font-size: 20pt;
+	}
+	
+	.hit-bar {
+		position: fixed;
+		bottom: 15px;
+		left: 15px;
+		width: 50px;
+		height: 300px;
+		background: rgba(150, 200, 100, .7);
+		z-index: 99;
+		font-family: "Consolas";
+		font-size: 20pt;
+	}
+
+	.random-element {
+		position: absolute;
+		color: #C9A957;
+		background: rgba(255, 255, 255, 0.15);
+		font-family: "lucida console";
+		font-size: 20pt;
+		height: 10px;
+		width: 10px;
+	}
+	
+	.sample-element {
+		position: relative;
+		color: #C9A957;
+		background: rgba(255, 255, 255, 0.15);
+		font-family: "lucida console";
+		font-size: 20pt;
+		height: 40px;
+		width: 80px;
+	}
+	
+	.arrow {
+		position: absolute;
+		color: yellow;
+	}
+	
+	.actor {
+		position: absolute;
+		left: 1%;
+		top: 96%;
+		width: 20px;
+		height: 20px;
+		font-size: 10pt;
+		color: #6316B2;
+		background: rgba(255, 255, 255, .15);
+		font-family: Consolas;
+		letter-spacing: .003pt;
+	}
+	
+	.game {
+		position: absolute;
+		background-color: #000A29;
+		left: 13%;
+		top: 13%;
+		width: 1500px;
+		height:750px;
+		transform: scale(4); //comment out to god view
+		animation: color-change 15s infinite;
+	}
+	
+	
+	
+</style>
+
+<script>
+	var angle = 0;
+	var x_velocity = 0;
+	var y_velocity = 0;
+	var x_translation = 0;
+	var y_translation = 0;
+	var map = {};
+	var freeze_controls = false;
+	var current_el = 0;
+	var speedCoefficient = 1;
+	var caught = false;
+	var hit_points = 100;
+	
+	var touchleft = false;
+	var touchright = false;
+	
+	function go(){
+
+	
+		for (var i = 0; i < 100; i ++){
+		
+			//desktop
+		
+			if (i == 39) {
+				if (map[i] == true){
+					angle -= 2;
+				}
+			}
+			if (i == 37) {
+				if (map[i] == true){
+					angle += 2;
+				}
+			}
+
+			if (i == 40) {
+				if (map[i] == true){
+					//back arrow
+				}
+			}
+			
+			if (i == 38 ) {
+				if (map[i] == true){
+					x_translation -= x_velocity;
+					y_translation -= y_velocity;
+				}
+			}
+		}
+		
+		//mobile controls
+		if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
+			document.querySelector('.left').addEventListener('touchstart', function(e){
+				//map[37] = true;
+				touchleft = true;
+			}, false)
+			
+			document.querySelector('.left').addEventListener('touchend', function(e){
+				//map[37] = false;
+				touchleft = false;
+			}, false)
+			
+			document.querySelector('.right').addEventListener('touchstart', function(e){
+				//map[39] = true;
+				touchright = true;
+			}, false)
+			
+			document.querySelector('.right').addEventListener('touchend', function(e){
+				//map[39] = false;
+				touchright = false;
+			}, false)
+			
+			if (touchright == true) {
+				angle -= 2;
+			}
+			
+			if (touchleft == true) {
+				angle += 2;
+			}
+			
+			x_translation -= x_velocity;
+			y_translation -= y_velocity;
+		}
+		
+		
+				
+		speedCoefficient = hit_points*.01;
+		
+		x_velocity = speedCoefficient*(Math.cos( (90-angle)/(180/Math.PI) ));
+		y_velocity = speedCoefficient*(Math.cos(angle/(180/Math.PI)));
+		
+		document.querySelector(".actor .rotator").style.transform = "rotate(" + angle*-1 + "deg)";
+		document.querySelector(".actor").style.transform = "translate(" + x_translation + "px, " + y_translation + "px)";
+		document.querySelector(".game").style.transformOrigin = (x_translation-75)*1.3 + "px " + (y_translation+680)*1.3 + "px";
+		//document.querySelector(".game").style.transformOrigin = 0 + "px " + 0 + "px";
+		document.querySelector(".hit-bar").innerHTML = Math.round(hit_points);
+			document.querySelector(".hit-bar").style.height = hit_points * 3;
+			document.querySelector(".hit-bar").style.background = 'rgba(200,' + parseInt(hit_points*2) + ', 100, .5)';
+		
+		
+		if (hit_points < 100) {
+			hit_points += .005;
+		}
+		
+		if (hit_points <= 0) {
+			document.querySelector(".console2").innerHTML = "Aw snap!<br />you died.";
+			freeze_controls = true;
+			map[39] = true;
+			
+			window.setInterval(function() {
+				window.location.reload();
+			}, 3000)
+		}
+		
+		if (rando[98].neutral == true && rando[99].neutral == true && rando[100].neutral == true) {
+			 
+			document.querySelector(".console").innerHTML = "Nice!<br /><span class='sample-element' style='color: red'>.</span> | <span class='sample-element' style='color: green'>.</span> | <span class='sample-element' style='color: blue'>.</span><br />all gems are safe.";
+			freeze_controls = true;
+			map[37] = true;
+			
+			window.setInterval(function() {
+				window.location.reload();
+			}, 3000)
+		}
+		
+	}
+		
+	function mapKeyDown(event) {
+		if (freeze_controls == false) {
+			map[event.keyCode] = true;
+		}
+	}
+
+	function mapKeyUp(event) {
+		map[event.keyCode] = false;
+	}
+
+	window.addEventListener("keyup", mapKeyUp, false);
+	window.addEventListener("keydown", mapKeyDown, false);
+
+	window.addEventListener("keydown", function(e) {
+    // space and arrow keys
+		if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+			e.preventDefault();
+		}
+	}, false);
+	
+	window.addEventListener("touchmove", function(e) {
+			e.preventDefault();
+	}, false);
+	
+	function shuffle(arra1) {
+		var ctr = arra1.length, temp, index;
+
+		while (ctr > 0) {
+			index = Math.floor(Math.random() * ctr);
+			ctr--;
+			temp = arra1[ctr];
+			arra1[ctr] = arra1[index];
+			arra1[index] = temp;
+		}
+		return arra1;
+	}	
+	
+	var posX = [];
+	var valX = 0;
+	var combinations = [];
+	
+	
+	for (ctr = 0; valX <= 7500;  ctr++) {
+		posX[ctr] = valX;
+		valX += 75;
+	}
+	
+	var aw = 0;
+	for (ctra = 1; ctra <= 9; ctra++) {
+		for (ctrb = 2; ctrb <= 19; ctrb++) {
+			combinations[aw] = [posX[ctra], posX[ctrb]];
+			aw ++;
+		}	
+	}
+	
+	shuffle(combinations);
+
+	var rando = [];
+	
+	function random_letters(ctr) {
+	
+		this.ctr = ctr;
+		this.top = combinations[ctr][0];	
+		this.left = combinations[ctr][1];
+		this.width = 25;
+		this.height = 25;
+		this.x_translate = 0;
+		this.y_translate = 0;
+		this.content = "*";
+		this.id = 'el' + ctr;
+		this.class = 'random-element';
+			
+		var new_el = document.createElement("span"); 
+		new_el.setAttribute('class', 'random-element'); 
+		new_el.setAttribute('id', this.id);
+		new_el.setAttribute('style', "width: " + this.width + "px; height: " + this.height + "px; position: absolute; top: " + this.top + "px; left: " + this.left + "px; color: " + this.color + ";");
+		var text = document.createTextNode(this.content); 
+		
+		new_el.appendChild(text);
+		
+		var randomizer = document.querySelector(".randomizer"); ; 
+		document.querySelector(".game").insertBefore(new_el, randomizer); 
+		
+	}
+	
+	
+	function random_debris(ctr) {
+	
+		this.neutral = false;
+		this.ctr = ctr;
+		this.top = combinations[ctr][0];	
+		this.left = combinations[ctr][1];
+		this.width = 25;
+		this.height = 25;
+		this.x_translate = 0;
+		this.y_translate = 0;
+		this.content = ".";
+		this.id = 'el' + ctr;
+		this.class = 'random-debris';
+		
+		if (this.ctr == 98) {
+			this.color = "red";
+			this.bgColor = 'rgba(255, 255, 255, 0.30)';
+		}
+
+		if (this.ctr == 99) {
+			this.color = "green";
+			this.bgColor = 'rgba(255, 255, 255, 0.30)';
+		}
+		
+		if (this.ctr == 100) {
+			this.color = "blue";
+			this.bgColor = 'rgba(255, 255, 255, 0.30)';
+		}
+		
+		var new_el = document.createElement("span"); 
+		new_el.setAttribute('class', 'random-element'); 
+		new_el.setAttribute('id', this.id);
+		new_el.setAttribute('style', "width: " + this.width + "px; height: " + this.height + "px; position: absolute; top: " + this.top + "px; left: " + this.left + "px; color: " + this.color + "; background-color: " + this.bgColor + ";");
+		
+		var text = document.createTextNode(this.content); 
+		
+		new_el.appendChild(text);
+		
+		var randomizer = document.querySelector(".randomizer"); ; 
+		document.querySelector(".game").insertBefore(new_el, randomizer); 
+		
+	}
+	
+	
+	for (var ctr = 0; ctr <= 50; ctr++) {
+		rando[ctr] = new random_letters(ctr);
+	}
+	
+	
+	for (var ctr = 71; ctr <= 100; ctr++) {
+		rando[ctr] = new random_debris(ctr);
+	}
+			
+
+	
+	
+	function detectColission(ac) {
+		for (var ctr = 0; ctr <= 50; ctr++) {
+								
+			var g_left = document.querySelector(".game").getBoundingClientRect().left;
+			var g_right = document.querySelector(".game").getBoundingClientRect().right;
+			var g_top = document.querySelector(".game").getBoundingClientRect().top;
+			var g_bottom = document.querySelector(".game").getBoundingClientRect().bottom;
+			
+			var ac_top = document.querySelector(".actor").getBoundingClientRect().top;
+			var ac_bottom = document.querySelector(".actor").getBoundingClientRect().bottom;
+			
+			var ac_left = document.querySelector(".actor").getBoundingClientRect().left;
+			var ac_right = document.querySelector(".actor").getBoundingClientRect().right;
+			
+			var el = document.querySelector("#el" + ctr + "");
+			var el_top = el.getBoundingClientRect().top;
+			var el_bottom = el.getBoundingClientRect().bottom;
+			
+			var el_left = el.getBoundingClientRect().left;
+			var el_right = el.getBoundingClientRect().right;
+			
+			//var ac = document.querySelector(".actor");
+			
+			//left boundary
+			if (g_left >= ac_left){
+				x_translation += .05;
+			}
+			
+			//lower left corner boundary
+			if ( ( Math.abs( (ac_left) - (g_left)) <= 15 ) && ( Math.abs( (ac_bottom) - (g_bottom)) <= 15 ) ) {
+					x_translation += .05;
+					y_translation += -.05;
+			}
+			
+			
+			//right boundary
+			if (g_right <= ac_right){
+				x_translation += -.05;
+				//y_translation -= y_velocity*.05;
+			}
+			
+			//lower right corner boundary
+			if ( ( Math.abs( (ac_right) - (g_right)) <= 15 ) && ( Math.abs( (ac_bottom) - (g_bottom)) <= 15 ) ) {
+					x_translation += .05;
+					y_translation += .05;
+			}
+			
+			//top boundary
+			if (g_top >= ac_top){
+				//x_translation -= x_velocity*.05;
+				y_translation += .05;
+			}
+			
+			//upper right corner boundary
+			if ( ( Math.abs( (ac_right) - (g_right)) <= 15 ) && ( Math.abs( (ac_top) - (g_top)) <= 15 ) ) {
+					x_translation += .05;
+					y_translation += .05;
+			}
+			
+			//upper left corner boundary
+			if ( ( Math.abs( (ac_left) - (g_left)) <= 15 ) && ( Math.abs( (ac_top) - (g_top)) <= 15 ) ) {
+					x_translation += .05;
+					y_translation += .05;
+			}
+			
+			
+			//bottom boundary
+			if (g_bottom <= ac_bottom){
+				//x_translation += -.05;
+				y_translation += -.05;
+			}
+			
+			
+			//right edge
+			if ( ( (ac_left < ( el_right ) ) && (ac_right > el_right) )
+					&&
+				( ( (ac_top > el_top) && ( (ac_bottom) < (el_bottom) ) ) || ((ac_top > el_top) && ( (ac_top) < (el_bottom))) || ((ac_bottom < el_bottom) && ( (ac_bottom) > (el_top))) )
+			) {
+				x_translation += .5;
+				hit_points -= .05;
+				ouch()
+			}
+			
+			//bottom edge
+			if ( ( (ac_top < (el_bottom) ) && (ac_bottom > el_bottom) )
+					&&
+				( ( (ac_left > el_left) && ( (ac_right) < (el_right) ) ) || ((ac_left > el_left) && ( (ac_left) < (el_right))) || ((ac_left < el_left) && ( (ac_right) > (el_left))) )
+			) {
+				y_translation += .5;
+				hit_points -= .05;
+				ouch()
+			}
+			
+			//top edge
+			if ( ( (ac_bottom > el_top) && (ac_bottom < el_bottom) )
+					&&
+				( ( (ac_left > el_left) && ( (ac_right) < (el_right) ) ) || ((ac_left > el_left) && ( (ac_left) < (el_right))) || ((ac_left < el_left) && ( (ac_right) > (el_left))) )
+			) {
+				y_translation += -.5;
+				hit_points -= .05;
+				ouch()
+			}
+			
+			//left edge
+			if ( ( (ac_right > el_left) && (ac_right < el_right) )
+					&&
+				( ( (ac_top > el_top) && ( (ac_bottom) < (el_bottom) ) ) || ((ac_top > el_top) && ( (ac_top) < (el_bottom))) || ((ac_bottom < el_bottom) && ( (ac_bottom) > (el_top))) )
+			) {
+				x_translation += -.5;
+				hit_points -= .05;
+				ouch()
+			}
+			
+			function ouch() {
+				 
+				document.querySelector(".console").innerHTML = "Ouch! that hurt";
+			}
+		}
+	}
+	
+	
+		function attract_debris(speed, distance) {
+			for (var ctr = 71; ctr <= 97; ctr++) {
+				
+				var el = document.querySelector("#el" + ctr + "");
+				//var el = rando[ctr];
+				
+				var el_top = el.getBoundingClientRect().top;
+				
+				var el_left = el.getBoundingClientRect().left;
+				
+				var ac = document.querySelector(".actor");
+				
+				var ac_top = ac.getBoundingClientRect().top;
+				
+				var ac_left = ac.getBoundingClientRect().left;
+				
+				function ouch() {
+					document.querySelector(".console").innerHTML = "Try to avoid anything yellow-ish.";
+				}
+				
+					if ( ( (ac_left - el_left < distance) && (ac_left - el_left > 0) ) && ( (ac_top - el_top < distance) && (ac_top - el_top > 0) ) ){
+						rando[ctr].x_translate += speed;
+						rando[ctr].y_translate += speed;
+					} else if ( ( (el_left- ac_left < distance) && (el_left - ac_left > 0) ) && ( (el_top - ac_top< distance) && (el_top - ac_top > 0) ) ){
+						rando[ctr].x_translate -= speed;
+						rando[ctr].y_translate -= speed;
+					} else if ( ( (ac_left - el_left < distance) && (ac_left - el_left > 0) ) && ( (el_top - ac_top< distance) && (el_top - ac_top > 0) ) ){
+						rando[ctr].x_translate += speed;
+						rando[ctr].y_translate -= speed;
+					} else if ( ( (el_left- ac_left < distance) && (el_left - ac_left > 0) ) && ( (ac_top - el_top < distance) && (ac_top - el_top > 0) ) ){
+						rando[ctr].x_translate -= speed;
+						rando[ctr].y_translate += speed;
+					} else {
+						if(rando[ctr].x_translate != 0) {
+							if (rando[ctr].x_translate > 0) {
+								rando[ctr].x_translate -= speed;
+							}
+							if (rando[ctr].x_translate < 0) {
+								rando[ctr].x_translate += speed;
+							}
+						}
+						
+						if(rando[ctr].y_translate != 0) {
+							if (rando[ctr].y_translate > 0) {
+								rando[ctr].y_translate -= speed;
+							}
+							if (rando[ctr].y_translate < 0) {
+								rando[ctr].y_translate += speed;
+							}
+						}
+					}
+				
+				if ((rando[98].neutral == true && rando[99].neutral == true && rando[100].neutral == true)){
+					if	(rando[ctr].x_translate != 0) {
+						if (rando[ctr].x_translate > 0) {
+							rando[ctr].x_translate -= speed;
+						}
+						if (rando[ctr].x_translate < 0) {
+							rando[ctr].x_translate += speed;
+						}
+					}
+					
+					if(rando[ctr].y_translate != 0) {
+						if (rando[ctr].y_translate > 0) {
+							rando[ctr].y_translate -= speed;
+						}
+						if (rando[ctr].y_translate < 0) {
+							rando[ctr].y_translate += speed;
+						}
+					}
+				}
+				
+				//el.style.transform = "translate(" + rando[ctr].x_translate + "px, " + rando[ctr].y_translate + "px)";
+				
+				if ( (Math.abs(el_left - ac_left) <= 50 ) && (Math.abs(el_top - ac_top) <= 50 )) {
+					if (hit_points > 0) {
+						hit_points -= .01;
+						ouch();
+					} 
+				} 
+				
+					el.style.transform = "translate(" + rando[ctr].x_translate + "px, " + rando[ctr].y_translate + "px)";
+			}
+		}
+		
+		function repel_debris(speed, distance) {
+			for (var ctr = 98; ctr <= 100; ctr++) {
+			
+				var ac_top = document.querySelector(".actor").getBoundingClientRect().top;
+				var ac_bottom = document.querySelector(".actor").getBoundingClientRect().bottom;
+				var ac_left = document.querySelector(".actor").getBoundingClientRect().left;
+				var ac_right = document.querySelector(".actor").getBoundingClientRect().right;
+				
+				var el = document.querySelector("#el" + ctr + "");
+				var el_top = el.getBoundingClientRect().top;
+				var el_left = el.getBoundingClientRect().left;
+				var el_right = el.getBoundingClientRect().right;
+				var el_bottom = el.getBoundingClientRect().bottom;
+				
+				var g_left = document.querySelector(".game").getBoundingClientRect().left;
+				var g_right = document.querySelector(".game").getBoundingClientRect().right;
+				var g_top = document.querySelector(".game").getBoundingClientRect().top;
+				var g_bottom = document.querySelector(".game").getBoundingClientRect().bottom;
+				
+				
+				
+				if (ctr == 98) {
+					speed = .3;
+				} else if (ctr == 99) {
+					speed = .4;
+				} else if (ctr == 100) {
+					speed = .5;
+				}
+				
+				if (rando[ctr].neutral == false) {
+					if ( ( (ac_left - el_left < distance) && (ac_left - el_left > 0) ) && ( (ac_top - el_top < distance) && (ac_top - el_top > 0) ) ){
+						rando[ctr].x_translate -= speed;
+						rando[ctr].y_translate -= speed;
+					} else if ( ( (el_left- ac_left < distance) && (el_left - ac_left > 0) ) && ( (el_top - ac_top< distance) && (el_top - ac_top > 0) ) ){
+						rando[ctr].x_translate += speed;
+						rando[ctr].y_translate += speed;
+					} else if ( ( (ac_left - el_left < distance) && (ac_left - el_left > 0) ) && ( (el_top - ac_top< distance) && (el_top - ac_top > 0) ) ){
+						rando[ctr].x_translate -= speed;
+						rando[ctr].y_translate += speed;
+					} else if ( ( (el_left- ac_left < distance) && (el_left - ac_left > 0) ) && ( (ac_top - el_top < distance) && (ac_top - el_top > 0) ) ){
+						rando[ctr].x_translate += speed;
+						rando[ctr].y_translate -= speed;
+					} else {
+						if(rando[ctr].x_translate != 0) {
+							if (rando[ctr].x_translate > 0) {
+								rando[ctr].x_translate -= speed;
+							}
+							if (rando[ctr].x_translate < 0) {
+								rando[ctr].x_translate += speed;
+							}
+						}
+						
+						if(rando[ctr].y_translate != 0) {
+							if (rando[ctr].y_translate > 0) {
+								rando[ctr].y_translate -= speed;
+							}
+							if (rando[ctr].y_translate < 0) {
+								rando[ctr].y_translate += speed;
+							}
+						}
+					}
+				}
+				
+				if (rando[ctr].neutral == false) {
+					if ( ( ( (ac_left - el_left < distance*3) && (ac_left - el_left > 0) ) && ( (ac_top - el_top < distance*2) && (ac_top - el_top > 0) ) ) ||
+						( ( (el_left- ac_left < distance*3) && (el_left - ac_left > 0) ) && ( (el_top - ac_top< distance*2) && (el_top - ac_top > 0) ) ) ||
+						( ( (ac_left - el_left < distance*3) && (ac_left - el_left > 0) ) && ( (el_top - ac_top< distance*2) && (el_top - ac_top > 0) ) ) ||
+						( ( (el_left- ac_left < distance*3) && (el_left - ac_left > 0) ) && ( (ac_top - el_top < distance*2) && (ac_top - el_top > 0) ) ) )
+						{
+							document.querySelector(".console3").style.visibility = "visible"
+							document.querySelector(".console3").innerHTML = "<span style='color:" + rando[ctr].color + "'>" + rando[ctr].color + "</span>" + " gem spotted";
+							
+							window.setTimeout(function(){
+								document.querySelector(".console3").style.visibility = "hidden";
+							}, 2000);
+					}
+				}
+				
+				el.style.transform = "translate(" + rando[ctr].x_translate + "px, " + rando[ctr].y_translate + "px)";
+				
+				if (((Math.abs(el_left - ac_left) <= 40 ) && (Math.abs(el_top - ac_top) <= 40 )) && (rando[ctr].neutral == false)) {
+					document.querySelector(".console2").innerHTML += "<span style='color:" + rando[ctr].color + "'>" + rando[ctr].color + "</span>" + " gem retrieved <br />";
+					el.style.color = "black";
+					rando[ctr].neutral = true;
+				} 
+			}
+		}
+	
+	function game() {
+		window.setInterval(function(){
+			go();
+			detectColission(document.querySelector(".actor"));
+			attract_debris(.5, 250);//distance relative to transform-scale
+			repel_debris(.5, 250);//distance relative to transform-scale , speed useless at the moment
+		},10);
+	}
+		
+	window.addEventListener("load", function() {
+		document.querySelector(".console2").innerHTML = "Oh no! the 3 Primary Gems have been stolen";
+		
+		window.setTimeout(function(){
+			document.querySelector(".console2").innerHTML = "You, the <span style='color: maroon'>Raider of</span>  <span style='color: green'>the Lost</span> <span style='color: blue'>Gems</span>, </br> have been assigned to retrieve them.";
+		}, 5000)
+		
+		window.setTimeout(function(){
+			if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
+				document.querySelector(".console").innerHTML = "controls<br />forward: up key<br />turn left/right: left/right key";
+			} else {
+				document.querySelector(".console").innerHTML = "controls<br />forward: automatic on phones <br/> turn left/right: touch left/right side of screen";
+			}
+			game();
+		}, 15000)
+		
+		window.setTimeout(function(){
+			document.querySelector(".console2").innerHTML = "these gem thieves hold the gems <span class='sample-element' style='color: red'>.</span> | <span class='sample-element' style='color: green'>.</span> | <span class='sample-element' style='color: blue'>.</span><br />your task is to find and catch them.";
+		}, 10000)
+		
+		window.setTimeout(function(){
+			document.querySelector(".console2").innerHTML = "";
+		}, 15000)
+		
+		window.setTimeout(function(){
+			window.setInterval(function(){
+				document.querySelector(".console1").style.visibility = "visible";
+					document.querySelector(".console1").innerHTML = "To retrieve a gem, you simply chase the thief.";
+				window.setTimeout(function(){
+					document.querySelector(".console1").innerHTML = "but it gets tricky sometimes.";
+				}, 5000);
+				window.setTimeout(function(){
+					document.querySelector(".console1").innerHTML = "you cannot go beyond the boundaries.";
+				}, 10000);
+				window.setTimeout(function(){
+					document.querySelector(".console1").innerHTML = "but thieves can go beyond the boundaries.";
+				}, 15000);
+				window.setTimeout(function(){
+					document.querySelector(".console1").innerHTML = "thieves return to their original places.";
+				}, 20000);
+				window.setTimeout(function(){
+					document.querySelector(".console1").innerHTML = "the yellows can hurt your health. avoid them.";
+				}, 25000);
+			}, 30000);
+		}, 5000);
+		
+	}, false);
+	
+		
+</script>
